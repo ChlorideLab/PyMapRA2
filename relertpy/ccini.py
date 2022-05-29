@@ -246,7 +246,8 @@ class INIClass:
             if len(i) == 0:
                 break
             if i[0] == '[':
-                cursect = [j.strip()[1:-1] for j in i.split(':')]
+                cursect = [j.strip()[1:-1] for j in
+                           i.split(';')[0].split(':')]
                 if cursect[0] in sections:
                     curopt = sections.index(cursect[0])
                 else:
