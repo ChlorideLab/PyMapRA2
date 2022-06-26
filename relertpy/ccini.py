@@ -155,10 +155,11 @@ class INIClass:
         del self._raw[section]
 
     def rename(self, _old, _new):
-        self[_new] = INISectionClass(_new,
-                                     self[_old].parent,
-                                     **self[_old])
-        self.remove(_old)
+        if self.hassection(_new):
+            raise KeyError(f'Section "{_new}" already exists!')
+        self[_new] = self[_old]
+        self[_new].section = _new
+        del self._raw[_old]
 
     def getsection(self, section):
         return self._raw.get(section,
