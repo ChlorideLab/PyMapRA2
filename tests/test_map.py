@@ -8,7 +8,7 @@ import relertpy as rpy
 wither = rpy.CCMap('.\\awither.map')
 for i in wither.teams:
     print(i)
-wither.save('D:\\wither.map')
+wither.save()
 
-wither_c = rpy.CCMap("D:\\wither.map")
-print(len(wither) == len(wither_c))
+# wither_c = rpy.CCMap("D:\\wither.map")
+# print(len(wither) == len(wither_c))

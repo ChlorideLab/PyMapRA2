@@ -2,12 +2,13 @@
 # @Time: 2022/04/20 0:00
 # @Author: Chloride
 import re
-from os import PathLike
+from os import PathLike, path as _path
 from typing import MutableMapping
 
 from .types import Array, Bool
 
-__all__ = ["INIClass", "INISectionClass",
+__all__ = ["INIClass", "CCINIClass",
+           "INISectionClass",
            ]
 
 
@@ -209,21 +210,6 @@ class INIClass:
             except OSError:
                 continue
 
-    @classmethod
-    def loadfile(cls, ccini, encoding='utf-8'):
-        """
-        Build an instance and read a single C&C ini file.
-        
-        Go fxxking split initialization.
-        """
-        ret = cls()
-        try:
-            with open(ccini, 'r', encoding=encoding) as fp:
-                ret.__fread(fp)
-        finally:
-            return ret
-
-
     def save(self, dst: PathLike | str, encoding='utf-8', withspace=False):
         """
         Save as a C&C ini.
@@ -287,3 +273,38 @@ class INIClass:
 
         self._raw = dict(zip(sections, options))
         return len(sections), len(options)
+
+
+class CCINIClass(INIClass):
+    def __init__(self, ccini: PathLike | str, encoding='utf-8'):
+        """
+        Initialize with a given INI file.
+
+        :param ccini: INI file path.
+        :param encoding: text encoding.
+        """
+        # private props
+        self.__full = _path.abspath(ccini)
+        self.__codec = encoding
+
+        if not _path.exists(ccini):
+            raise FileNotFoundError(ccini)
+
+        super().__init__()
+        self.load(ccini, encoding)
+
+    def save(self, dst=None, encoding=None, withspace=False):
+        """
+        Save as a C&C ini.
+
+        :param dst: target path, overwrite the source by default
+        :param encoding: by default using the encoding when initialize
+        :param withspace: shall we use spaces around '='?
+        """
+        dst = self.__full if dst is None else dst
+        encoding = self.__codec if encoding is None else encoding
+
+        super().save(dst, encoding, withspace)
+
+    def __repr__(self):
+        return self.__full

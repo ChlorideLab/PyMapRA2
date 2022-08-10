@@ -5,11 +5,10 @@ import _context
 
 import relertpy.ccini as ini
 
-config1 = ini.INIClass()
+config1 = ini.CCINIClass(".\\eg.ini")
 # config2 = ini.INIClass()
 
-config1.load(".\\eg.ini")
 print(config1['ExampleInherit']['IsCasheenBurnt'])
 print(config1['ExampleInherit']['VoiceDoi'])
 
-config1.save("..\\ego.ini")
+config1.save(".\\ego.ini")

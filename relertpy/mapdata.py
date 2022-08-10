@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 # @Time: 2022/04/22 0:17
 # @Author: Chloride
-from os import PathLike, path
+from os import PathLike
 from types import MappingProxyType
 from uuid import uuid4
 
 from . import structs as meta
-from .ccini import INIClass
+from .ccini import CCINIClass
 from .types import Bool
 
 __all__ = ['MapClass']
 
 
-class MapClass(INIClass):
+class MapClass(CCINIClass):
     """
     RA2 (and/or YR, within mods) MAP Structure.
     """
@@ -24,15 +24,7 @@ class MapClass(INIClass):
         :param pathref: map file (*.map, *.mpr, *.yrm) source.
         :param encoding: FA2 using ANSI, while Relert Sharp using UTF-8.
         """
-        # private props
-        self.__full = path.abspath(pathref)
-        self.__codec = encoding
-
-        if not path.exists(pathref):
-            raise FileNotFoundError(pathref)
-
-        super().__init__()
-        self.load(pathref, encoding)
+        super().__init__(pathref, encoding)
 
         def _getreg(_meta, _section: str, *,
                     rp_origin=True, iniptr=False):
@@ -165,9 +157,6 @@ class MapClass(INIClass):
         :param encoding: by default using the encoding when initialize
         :param withspace: shall we use spaces around '='?
         """
-        dst = self.__full if dst is None else dst
-        encoding = self.__codec if encoding is None else encoding
-
         # the sections wouldn't allow repeat values,
         # since in game it'll pick the first one among them.
         # as for keys, should be the last one.
@@ -226,6 +215,3 @@ class MapClass(INIClass):
             }
 
         super().save(dst, encoding, withspace)
-
-    def __repr__(self):
-        return self.__full
