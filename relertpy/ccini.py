@@ -202,15 +202,27 @@ class INIClass:
         """
         if isinstance(ccinis, (str, bytes)):
             ccinis = [ccinis]
-        read_ok = []
         for ref in ccinis:
             try:
                 with open(ref, 'r', encoding=encoding) as fp:
                     self.__fread(fp)
             except OSError:
                 continue
-            read_ok.append(ref)
-        return read_ok
+
+    @classmethod
+    def loadfile(cls, ccini, encoding='utf-8'):
+        """
+        Build an instance and read a single C&C ini file.
+        
+        Go fxxking split initialization.
+        """
+        ret = cls()
+        try:
+            with open(ccini, 'r', encoding=encoding) as fp:
+                ret.__fread(fp)
+        finally:
+            return ret
+
 
     def save(self, dst: PathLike | str, encoding='utf-8', withspace=False):
         """
