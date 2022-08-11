@@ -149,13 +149,14 @@ class MapClass(CCINIClass):
                       'AmbientChangeStep',
                       str(float(value)))
 
-    def save(self, dst=None, encoding=None, withspace=False):
+    def save(self, dst=None, encoding=None, withspace=False, blankline=1):
         """
         Save as a map file.
 
         :param dst: target path, overwrite the source map by default
         :param encoding: by default using the encoding when initialize
         :param withspace: shall we use spaces around '='?
+        :param blankline: how many lines between sections?
         """
         # the sections wouldn't allow repeat values,
         # since in game it'll pick the first one among them.
@@ -214,4 +215,4 @@ class MapClass(CCINIClass):
                 for a in self.triggers
             }
 
-        super().save(dst, encoding, withspace)
+        super().save(dst, encoding, withspace, blankline)

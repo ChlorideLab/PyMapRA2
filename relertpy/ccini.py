@@ -210,13 +210,15 @@ class INIClass:
             except OSError:
                 continue
 
-    def save(self, dst: PathLike | str, encoding='utf-8', withspace=False):
+    def save(self, dst: PathLike | str, encoding='utf-8',
+             withspace=False, blankline=1):
         """
         Save as a C&C ini.
 
         :param dst: target ini path.
         :param encoding: text encoding.
         :param withspace: shall we use spaces around '='?
+        :param blankline: how many lines between sections?
         """
         _eq = ' = ' if withspace else '='
 
@@ -225,7 +227,7 @@ class INIClass:
                 fs.write(f"{i.tostring()}\n")
                 for key, value in i.items(useraw=True):
                     fs.write(f"{key}{_eq}{value}\n")
-                fs.write("\n")
+                fs.write("\n" * blankline)
 
     def __fread(self, stream):
         if not self._raw:
@@ -293,18 +295,19 @@ class CCINIClass(INIClass):
         super().__init__()
         self.load(ccini, encoding)
 
-    def save(self, dst=None, encoding=None, withspace=False):
+    def save(self, dst=None, encoding=None, withspace=False, blankline=1):
         """
         Save as a C&C ini.
 
         :param dst: target path, overwrite the source by default
         :param encoding: by default using the encoding when initialize
         :param withspace: shall we use spaces around '='?
+        :param blankline: how many lines between sections?
         """
         dst = self.__full if dst is None else dst
         encoding = self.__codec if encoding is None else encoding
 
-        super().save(dst, encoding, withspace)
+        super().save(dst, encoding, withspace, blankline)
 
     def __repr__(self):
         return self.__full
