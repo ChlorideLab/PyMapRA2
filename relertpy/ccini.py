@@ -310,4 +310,7 @@ class CCINIClass(INIClass):
         super().save(dst, encoding, withspace, blankline)
 
     def __repr__(self):
-        return self.__full
+        return "%s: %s" % (self.__full, self.__codec)
+
+    def __str__(self):
+        return _path.split(self.__full)[-1]
