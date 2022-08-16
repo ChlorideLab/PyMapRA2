@@ -191,7 +191,7 @@ class INIClass:
         _o_raw = {k: self._raw[k] for k in _sects}
         self._raw = _o_raw
 
-    def load(self, ccinis, encoding='utf-8'):
+    def load(self, *ccinis, encoding='utf-8'):
         """
         Load C&C ini(s).
 
@@ -201,8 +201,6 @@ class INIClass:
         :param ccinis: INI file path(s), make sure the order of them.
         :param encoding: text encoding.
         """
-        if isinstance(ccinis, (str, bytes)):
-            ccinis = [ccinis]
         for ref in ccinis:
             try:
                 with open(ref, 'r', encoding=encoding) as fp:
@@ -293,7 +291,7 @@ class CCINIClass(INIClass):
             raise FileNotFoundError(ccini)
 
         super().__init__()
-        self.load(ccini, encoding)
+        self.load(ccini, encoding=encoding)
 
     def save(self, dst=None, encoding=None, withspace=False, blankline=1):
         """
