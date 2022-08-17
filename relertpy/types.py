@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Time: 2022/04/20 21:08
 # @Author: Chloride
-from typing import Sequence, NewType as TypeDef
+from typing import Sequence, NewType, Iterable
 
 
 class Array(Sequence):
@@ -9,7 +9,7 @@ class Array(Sequence):
     def __init__(self, *args):
         if not args:
             self._lst = list()
-        elif len(args) == 1:
+        elif len(args) == 1 and isinstance(*args, Iterable):
             self._lst = list(*args)
         else:
             self._lst = list(args)
@@ -43,7 +43,7 @@ class Coord:
         return x, y
 
     @staticmethod
-    def join(point: TypeDef('Point2D', Array)):
+    def join(point: NewType('Point2D', Array)):
         return "%d" % (1000 * point[1] + point[0])
 
 
