@@ -141,19 +141,15 @@ class INIClass:
         return section in self._raw
 
     def hasoption(self, section, option):
-        if not self.hassection(section):
-            return False
-        else:
-            return option in self[section]
+        return section in self._raw and option in self._raw[section]
 
-    def add(self, section):
+    def addnew(self, section):
         if not self.hassection(section):
             self._raw[section] = INISectionClass(section)
 
     def remove(self, section):
-        if not self.hassection(section):
-            return
-        del self._raw[section]
+        if self.hassection(section):
+            del self._raw[section]
 
     def rename(self, _old, _new):
         if self.hassection(_new):
@@ -167,20 +163,15 @@ class INIClass:
                              INISectionClass(section))
 
     def getvalue(self, section, key, fallback=None):
-        try:
-            sect = self._raw[section]
-            return fallback if not sect.get(key) else sect[key]
-        except KeyError:
-            return fallback
+        return (self._raw[section][key]
+                if self.hasoption(section, key) else fallback)
 
     def gettypelist(self, section, fallback=Array()):
-        if not self.hassection(section):
-            return fallback
-        return list(self._raw[section].values(useraw=True))
+        return (list(self._raw[section].values(useraw=True))
+                if self.hassection(section) else fallback)
 
     def setvalue(self, section, key, value):
-        if not self.hassection(section):
-            self.add(section)
+        self.addnew(section)
         self._raw[section][key] = value
 
     def clear(self):
