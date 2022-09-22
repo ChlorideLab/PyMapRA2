@@ -108,6 +108,7 @@ class INIClass:
     - include sub inis: '[#include]' (NOT directly)
 
     """
+    __diff = 0  # for multiple inis processing
 
     def __init__(self):
         """Initialize an empty INI structure."""
@@ -152,7 +153,7 @@ class INIClass:
             del self._raw[section]
 
     def rename(self, _old, _new):
-        if self.hassection(_new):
+        if self.hassection(_new) or _old == _new:
             raise KeyError(f'Section "{_new}" already exists!')
         self[_new] = self[_old]
         self[_new].section = _new
@@ -227,10 +228,6 @@ class INIClass:
             options = list(self._raw.values())
             curopt = maxopt = len(options) - 1
 
-        # since we just read A map when called,
-        # instead of processing multiple inis
-        diff = 0
-
         while True:
             i = stream.readline()
             if len(i) == 0:
@@ -258,8 +255,8 @@ class INIClass:
                     j[1] = j[1].split(";")[0].strip()
                     # ares struct: += a
                     if j[0] == '+':
-                        j[0] = f"+{diff}"
-                        diff += 1
+                        j[0] = f"+{self.__diff}"
+                        self.__diff += 1
                     options[curopt].update([j])
 
         self._raw = dict(zip(sections, options))

@@ -76,11 +76,11 @@ class MapClass(CCINIClass):
         self.countries = _getreg(meta.Country, 'Countries',
                                  iniptr=True)
 
-        self.infantries = _gettype(meta.Infantry.loadinf, 'Infantry')
-        self.units = _gettype(meta.Vehicle.loadunit, 'Units')
+        self.infantries = _gettype(meta.Infantry.fromvalue, 'Infantry')
+        self.units = _gettype(meta.Vehicle.fromvalue, 'Units')
         self.buildings = _gettype(meta.Building.loadbuilding,
                                   'Structures')
-        self.aircrafts = _gettype(meta.Aircraft.loadair, 'Aircrafts')
+        self.aircrafts = _gettype(meta.Aircraft.fromvalue, 'Aircrafts')
 
     def getfreeregid(self):
         while True:

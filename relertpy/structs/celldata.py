@@ -20,6 +20,7 @@ The remaining items are expressed as a list of instances,
 with a useless numbering (gamemd uses array index actually)
 as key, and an Array-like string as value.
 """
+import abc
 from ..types import Array, Coord
 
 
@@ -114,24 +115,44 @@ class Smudge:
         return f'{self.typeof} TopCell({self.coord})'
 
 
-class Infantry:
+class FootClass(metaclass=abc.ABCMeta):
+    owner = 'Neutral House'
+    typeof = ""
+    health = 256
+    coord = Array(0, 0)
+    mission = 'Guard'
+    facing = 0
+    tag = None
+    veteran = 0
+    group = -1
+    autocreate_no = False
+    autocreate_yes = True
+
+    @abc.abstractmethod
     def __init__(self):
-        self.owner = 'Neutral House'
-        self.typeof = 'E1'
-        self.health = 256
-        self.coord = Array(0, 0)
-        self.subcell = 0
-        self.mission = 'Guard'
-        self.facing = 0
-        self.tag = None
-        self.veteran = 0
-        self.group = -1
-        self.onbridge = False
-        self.autocreate_no = False
-        self.autocreate_yes = True
+        pass
+
+    @abc.abstractmethod
+    def apply(self):
+        pass
 
     @classmethod
-    def loadinf(cls, args: str | Array):
+    @abc.abstractmethod
+    def fromvalue(cls, args: str | Array):
+        pass
+
+    def __repr__(self) -> str:
+        return f'{self.typeof} ({self.coord})'
+
+
+class Infantry(FootClass):
+    def __init__(self):
+        self.typeof = 'E1'
+        self.subcell = 0
+        self.onbridge = False
+
+    @classmethod
+    def fromvalue(cls, args: str | Array):
         if type(args) == str:
             args = args.split(',')
         ret = cls()
@@ -158,40 +179,54 @@ class Infantry:
             int(self.autocreate_no), int(self.autocreate_yes)
         ]))
 
-    def __repr__(self) -> str:
-        return f'{self.typeof} ({self.coord})'
 
-
-class Vehicle:
-    def __init__(self):
-        self.owner = 'Neutral House'
-        self.typeof = 'AMCV'
-        self.health = 256
-        self.coord = Array(0, 0)
-        self.facing = 0
-        self.mission = 'Guard'
-        self.tag = None
-        self.veteran = 0
-        self.group = -1
-        self.onbridge = False
-        self.followid = -1
-        self.autocreate_no = False
-        self.autocreate_yes = True
-
-    @classmethod
-    def loadunit(cls, args: str):
+class FootUnitUtil:
+    @staticmethod
+    def fromvalue(instance, args: str | Array):
         if type(args) == str:
             args = args.split(',')
-        ret = cls()
-        ret.owner = args[0]
-        ret.typeof = args[1]
-        ret.health = int(args[2])
-        ret.coord = Array(map(int, args[3:5]))
-        ret.facing = int(args[5])
-        ret.mission = args[6]
-        ret.tag = None if args[7] == 'None' else args[7]
-        ret.veteran = int(args[8])
-        ret.group = int(args[9])
+        instance.owner = args[0]
+        instance.typeof = args[1]
+        instance.health = int(args[2])
+        instance.coord = Array(map(int, args[3:5]))
+        instance.facing = int(args[5])
+        instance.mission = args[6]
+        instance.tag = None if args[7] == 'None' else args[7]
+        instance.veteran = int(args[8])
+        instance.group = int(args[9])
+        return instance
+
+
+class Aircraft(FootClass):
+    def __init__(self):
+        self.typeof = 'ORCA'
+
+    @classmethod
+    def fromvalue(cls, args: str | Array):
+        ret = FootUnitUtil.fromvalue(cls(), args)
+        ret.autocreate_no = args[10] == '1'
+        ret.autocreate_yes = args[11] == '1'
+        return ret
+
+    def apply(self):
+        return ",".join(map(str, [
+            self.owner, self.typeof, self.health,
+            self.coord, self.facing, self.mission,
+            self.tag, self.veteran, self.group,
+            int(self.autocreate_no),
+            int(self.autocreate_yes)
+        ]))
+
+
+class Vehicle(FootClass):
+    def __init__(self):
+        self.typeof = 'AMCV'
+        self.onbridge = False
+        self.followid = -1
+
+    @classmethod
+    def fromvalue(cls, args: str | Array):
+        ret = FootUnitUtil.fromvalue(cls(), args)
         ret.onbridge = args[10] == '1'
         ret.followid = int(args[11])
         ret.autocreate_no = args[12] == '1'
@@ -205,9 +240,6 @@ class Vehicle:
             int(self.onbridge), self.followid,
             int(self.autocreate_no), int(self.autocreate_yes)
         ]))
-
-    def __repr__(self) -> str:
-        return f'{self.typeof} ({self.coord})'
 
 
 class Building:
@@ -260,47 +292,3 @@ class Building:
 
     def __repr__(self) -> str:
         return f'{self.typeof} TopCell({self.coord})'
-
-
-class Aircraft:
-    def __init__(self):
-        self.owner = 'Neutral House'
-        self.typeof = 'ORCA'
-        self.health = 256
-        self.coord = Array(0, 0)
-        self.facing = 0
-        self.mission = 'Guard'
-        self.tag = None
-        self.veteran = 0
-        self.group = -1
-        self.autocreate_no = True
-        self.autocreate_yes = False
-
-    @classmethod
-    def loadair(cls, args: str):
-        if type(args) == str:
-            args = args.split(',')
-        ret = cls()
-        ret.owner = args[0]
-        ret.typeof = args[1]
-        ret.health = int(args[2])
-        ret.coord = Array(map(int, args[3:5]))
-        ret.facing = int(args[5])
-        ret.mission = args[6]
-        ret.tag = None if args[7] == 'None' else args[7]
-        ret.veteran = int(args[8])
-        ret.group = int(args[9])
-        ret.autocreate_no = args[10] == '1'
-        ret.autocreate_yes = args[11] == '1'
-
-    def apply(self):
-        return ",".join(map(str, [
-            self.owner, self.typeof, self.health,
-            self.coord, self.facing, self.mission,
-            self.tag, self.veteran, self.group,
-            int(self.autocreate_no),
-            int(self.autocreate_yes)
-        ]))
-
-    def __repr__(self) -> str:
-        return f'{self.typeof} ({self.coord})'
