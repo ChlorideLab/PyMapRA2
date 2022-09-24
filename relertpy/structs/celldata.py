@@ -145,6 +145,26 @@ class FootClass(metaclass=abc.ABCMeta):
         return f'{self.typeof} ({self.coord})'
 
 
+class FootUtil:
+    @staticmethod
+    def newobject(ins, args: str | Array):
+        ins.owner = args[0]
+        ins.typeof = args[1]
+        ins.health = int(args[2])
+        ins.coord = Array(map(int, args[3:5]))
+        return ins
+
+    @staticmethod
+    def newunit(ins, args: str | Array):
+        ins = FootUtil.newobject(ins, args)
+        ins.facing = int(args[5])
+        ins.mission = args[6]
+        ins.tag = None if args[7] == 'None' else args[7]
+        ins.veteran = int(args[8])
+        ins.group = int(args[9])
+        return ins
+
+
 class Infantry(FootClass):
     def __init__(self):
         self.typeof = 'E1'
@@ -155,11 +175,7 @@ class Infantry(FootClass):
     def fromvalue(cls, args: str | Array):
         if type(args) == str:
             args = args.split(',')
-        ret = cls()
-        ret.owner = args[0]
-        ret.typeof = args[1]
-        ret.health = int(args[2])
-        ret.coord = Array(map(int, args[3:5]))
+        ret = FootUtil.newobject(cls(), args)
         ret.subcell = int(args[5])
         ret.mission = args[6]
         ret.facing = int(args[7])
@@ -180,30 +196,15 @@ class Infantry(FootClass):
         ]))
 
 
-class FootUnitUtil:
-    @staticmethod
-    def fromvalue(instance, args: str | Array):
-        if type(args) == str:
-            args = args.split(',')
-        instance.owner = args[0]
-        instance.typeof = args[1]
-        instance.health = int(args[2])
-        instance.coord = Array(map(int, args[3:5]))
-        instance.facing = int(args[5])
-        instance.mission = args[6]
-        instance.tag = None if args[7] == 'None' else args[7]
-        instance.veteran = int(args[8])
-        instance.group = int(args[9])
-        return instance
-
-
 class Aircraft(FootClass):
     def __init__(self):
         self.typeof = 'ORCA'
 
     @classmethod
     def fromvalue(cls, args: str | Array):
-        ret = FootUnitUtil.fromvalue(cls(), args)
+        if type(args) == str:
+            args = args.split(',')
+        ret = FootUtil.newunit(cls(), args)
         ret.autocreate_no = args[10] == '1'
         ret.autocreate_yes = args[11] == '1'
         return ret
@@ -226,7 +227,9 @@ class Vehicle(FootClass):
 
     @classmethod
     def fromvalue(cls, args: str | Array):
-        ret = FootUnitUtil.fromvalue(cls(), args)
+        if type(args) == str:
+            args = args.split(',')
+        ret = FootUtil.newunit(cls(), args)
         ret.onbridge = args[10] == '1'
         ret.followid = int(args[11])
         ret.autocreate_no = args[12] == '1'
@@ -262,11 +265,7 @@ class Building:
     def loadbuilding(cls, args: str):
         if type(args) == str:
             args = args.split(',')
-        ret = cls()
-        ret.owner = args[0]
-        ret.typeof = args[1]
-        ret.health = int(args[2])
-        ret.coord = Array(map(int, args[3:5]))
+        ret = FootUtil.newobject(cls(), args)  # still fit even not FootClass.
         ret.facing = int(args[5])
         ret.tag = None if args[6] == 'None' else args[6]
         ret.ai_sellable = args[7] == '1'
