@@ -78,6 +78,18 @@ class INISectionClass(MutableMapping):
         _o_sect = {k: self._map[k] for k in _items}
         self._map = _o_sect
 
+    def copydata(self, ienum_keyvalpair):
+        if not isinstance(ienum_keyvalpair, MutableMapping):
+            raise TypeError("ienum_keyvalpair")
+        self._map = {str(k): str(v) for k, v in ienum_keyvalpair.items()}
+
+    def copyfrom(self, inisection):
+        if not isinstance(inisection, INISectionClass):
+            raise TypeError("inisection")
+        self.section = inisection.section
+        self.parent = inisection.parent
+        self._map = dict(inisection.items(useraw=True))
+
     def tryparse(self, option, fallback):
         try:
             value: str = self._map[option]
@@ -121,9 +133,9 @@ class INIClass:
         if not isinstance(key, str):
             raise TypeError("Section name should always be str.")
         if isinstance(value, INISectionClass):
-            self._raw[key] = value
+            self._raw[key].copyfrom(value)
         else:
-            self._raw[key] = INISectionClass(key, **value)
+            self._raw[key].copydata(value)
 
     def __delitem__(self, key):
         del self._raw[key]
